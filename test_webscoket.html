@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<p id="word">
+
+</p>
+<div id="confirm_name">
+    chat_name: <input id="name" type="text" value=""/> <button onclick="checkName()">confirmName</button>
+</div>
+<div style="position: absolute; bottom:10%; vertical-align: middle;">
+<input id="msg" type="text" value=""/>
+<a onclick="sendMsg()">send</a>
+<a onclick="connectSocket()">connect</a>
+<a onclick="closeSocket()">disconnect</a>
+</div>
+<script>
+    const HOST = "ws://localhost:9000";
+    let ws = null;
+    let chatname = "";
+    let id = null;
+
+    function connectSocket(){
+        if(ws){
+            return
+        }
+        chatname = checkName();
+        ws = new WebSocket(HOST+"?name="+chatname);
+
+        ws.onopen = function()
+        {
+            console.log("you can send msg...");
+            document.getElementById("word").style.borderColor = "green";
+
+        };
+
+        ws.onclose = function()
+        {
+            console.log("连接已关闭...");
+            document.getElementById("word").style.borderColor = "red";
+        };
+
+        ws.onmessage = function (evt)
+        {
+            let received_msg = evt.data;
+            try{
+                received_msg = JSON.parse(received_msg);
+                if(received_msg.id){
+                    chatname = chatname ? chatname : "visitor"+received_msg.id;
+                    received_msg.msg = received_msg.msg.replace("%", chatname);
+                }
+            }catch(exception){
+                console.log(exception);
+            }
+
+            let origin = document.getElementById("word").innerText;
+            document.getElementById("word").innerText = origin+received_msg.name+">"+received_msg.msg+"\n";
+            scrollContent("word");
+        };
+    }
+
+    function sendMsg(){
+        let msg = document.getElementById("msg").value;
+        let send_body = {
+            "msg": msg,
+            "name": chatname
+        };
+        if(ws) {
+            ws.send(JSON.stringify(send_body));
+        }
+        document.getElementById("msg").value = "";
+
+        scrollContent("word");
+    }
+
+    function closeSocket(){
+        if(ws){
+            ws.send(JSON.stringify({
+                "msg": chatname+" is go away",
+                "name": "server"
+            }));
+            ws.close();
+        }
+        ws = null;
+    }
+
+    function scrollContent(element_id="word"){
+        document.getElementById(element_id).scrollTop = document.getElementById(element_id).scrollHeight
+    }
+
+    function checkName(name=null){
+        try{
+            chatname = name ? name : document.getElementById("name").value;
+            document.getElementById("confirm_name").remove();
+        }catch(Exception){
+            console.log("----");
+        }
+        return chatname;
+    }
+    //
+</script>
+</body>
+<style>
+    #word{
+        height: 400px;
+        overflow-y: scroll;
+        padding-bottom: 200px;
+        width: 600px;
+        border: red 3px solid;
+        background: #444;
+        color: #aaff22;
+    }
+    #msg{
+        display: inline-block;
+        width: 300px;
+        height: 30px;
+        font-size: 30px;
+        border-width: 0 0 1px 0;
+        border-bottom-color: #4169e1;
+    }
+    a{
+        display: inline-block;
+        height: 30px;
+        width: 150px;
+        font-size: 20px;
+        text-align: center;
+        background: linear-gradient(45deg, #444, #aaff22);
+    }
+
+</style>
+</html>
