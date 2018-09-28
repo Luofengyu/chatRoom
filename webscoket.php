@@ -6,6 +6,13 @@
  * Time: 下午4:42
  */
 
+/*
+ * todo
+ * 当前聊天室人数
+ * 历史记录
+ * 直接关闭浏览器推出的播报
+ * */
+
 class swooleWebsocket{
     function __construct(){
         $server = new swoole_websocket_server("0.0.0.0", 9000);
