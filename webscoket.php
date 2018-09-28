@@ -8,7 +8,7 @@
 
 class swooleWebsocket{
     function __construct(){
-        $server = new swoole_websocket_server("127.0.0.1", 9000);
+        $server = new swoole_websocket_server("0.0.0.0", 9000);
 
         $server->on('open', function($server, $req) {
             echo "connection open: user id:{$req->fd}\n";
