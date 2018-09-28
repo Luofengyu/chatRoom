@@ -8,10 +8,10 @@
 <p id="word">
 
 </p>
-<div id="confirm_name">
+<div id="confirm_name" style="margin-top: 50px;">
     chat_name: <input id="name" type="text" value=""/> <button onclick="checkName()">confirmName</button>
 </div>
-<div style="position: absolute; bottom:10%; vertical-align: middle;">
+<div style="vertical-align: middle;margin-top: 50px;">
 <input id="msg" type="text" value=""/>
 <a onclick="sendMsg()">send</a>
 <a onclick="connectSocket()">connect</a>
@@ -19,6 +19,7 @@
 </div>
 <script>
     const HOST = "ws://47.106.172.189:9000";
+    // const HOST = "ws://localhost:9000";
     let ws = null;
     let chatname = "";
     let id = null;

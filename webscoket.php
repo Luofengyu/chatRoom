@@ -14,24 +14,37 @@
  * */
 
 class swooleWebsocket{
-    function __construct(){
-        $server = new swoole_websocket_server("0.0.0.0", 9000);
+    public $server;
+    public $redis;
+    public $is_connect_redis = false;
+    const redisOptions = [
+        "timeout" => 2,
+        "database" => 0,
+    ];
 
-        $server->on('open', function($server, $req) {
+    function __construct(){
+        $this->create_socket_server();
+//        $this->connect_redis();
+    }
+
+    function create_socket_server(){
+        $this->server = new swoole_websocket_server("0.0.0.0", 9000);
+
+        $this->server->on('open', function($server, $req) {
             echo "connection open: user id:{$req->fd}\n";
             $name = $req->get["name"] ?: "%";
             $this->push_to_everyone($server, $this->write_system_msg("{$name} come to chatroom", $req->fd));
         });
 
-        $server->on('message', function($server, $frame) {
+        $this->server->on('message', function($server, $frame) {
             $msg = $frame->data;
             $this->push_to_everyone($server, $msg);
         });
 
-        $server->on('close', function($server, $fd) {
+        $this->server->on('close', function($server, $fd) {
             echo "connection close: {$fd}\n";
         });
-        $server->start();
+        $this->server->start();
     }
 
     function push_to_everyone($server, $msg){
@@ -47,6 +60,17 @@ class swooleWebsocket{
             "name" => "server"
         ]);
     }
+
+    function connect_redis(){
+        $this->redis = new Redis();
+        $this->redis->connect("localhost");
+        $this->redis->select(0);
+        $this->redis->flushDB();
+
+
+    }
+
+
 
 }
 
